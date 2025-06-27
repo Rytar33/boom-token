@@ -48,8 +48,8 @@ public class Program
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(builder.Configuration
-                    .GetSection("Jwt")
-                    .GetSection("SecretKey").Value!))
+                    .GetSection(nameof(JwtOption))
+                    .GetSection(nameof(JwtOption.SecretKey)).Value!))
             };
         });
         builder.Services.AddAuthorization(options =>
@@ -109,7 +109,7 @@ public class Program
         
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         
-        var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+        var connectionString = builder.Configuration.GetConnectionString(nameof(BoomTokenContext));
         builder.Services.AddDbContext<BoomTokenContext>(
             o => o.UseNpgsql(connectionString)
                 //.UseLoggerFactory(LoggerFactory.Create(builder => { builder.AddConsole(); }))
@@ -145,7 +145,7 @@ public class Program
         builder.Services.AddHostedService<TelegramBotBackgroundService>();
 
         builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection("Telegram"));
-        builder.Services.Configure<JwtOption>(builder.Configuration.GetSection("Jwt"));
+        builder.Services.Configure<JwtOption>(builder.Configuration.GetSection(nameof(JwtOption)));
         builder.Services.AddSingleton<IJwtOption>(sp =>
         {
             var jwtOption = sp.GetRequiredService<IOptions<JwtOption>>().Value;
